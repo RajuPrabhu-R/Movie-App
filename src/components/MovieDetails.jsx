@@ -53,7 +53,7 @@ const MovieDetails = ({ movie, onClose }) => {
   return (
     <div
       className="movie-card mt-20 bg-grey bg-opacity-70 flex z-50 justify-center items-center"
-      id="movie-details-find"
+      id=`${movie.id}`
     >
       <div className="bg-dark-100 rounded-lg w-full max-w-4xl relative">
         <button
