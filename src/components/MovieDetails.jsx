@@ -50,9 +50,11 @@ const MovieDetails = ({ movie, onClose }) => {
 
   const embedUrl = `https://multiembed.mov/?video_id=${movie.id}&tmdb=1`;
 
-
   return (
-    <div className="movie-card mt-20 bg-grey bg-opacity-70 flex z-50 justify-center items-center" id="movie-details-find">
+    <div
+      className="movie-card mt-20 bg-grey bg-opacity-70 flex z-50 justify-center items-center"
+      id="movie-details-find"
+    >
       <div className="bg-dark-100 rounded-lg w-full max-w-4xl relative">
         <button
           className="absolute top-3 -right-10 text-white text-3xl w-10 h-10 bg-gray-500 rounded-full hover:text-red-500"
@@ -70,18 +72,39 @@ const MovieDetails = ({ movie, onClose }) => {
             />
           </div>
           <div className="text-white mt-10">
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Language :</strong> {movie.original_language.toUpperCase()}</p>
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Popularity :</strong> {movie.popularity.toFixed(1)}</p>
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Release Date :</strong> {movie.release_date}</p>
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Rating :</strong> {movie.vote_average.toFixed(1)} / 10</p>
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Genres :</strong> {getGenreNames(movie.genre_ids) || "No genres available."}</p>
-            <p className="mt-4 mb-4"><strong className="text-yellow-200">Overview :</strong> {movie.overview || "No overview available."}</p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Language :</strong>{" "}
+              {movie.original_language.toUpperCase()}
+            </p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Popularity :</strong>{" "}
+              {movie.popularity.toFixed(1)}
+            </p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Release Date :</strong>{" "}
+              {movie.release_date}
+            </p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Rating :</strong>{" "}
+              {movie.vote_average.toFixed(1)} / 10
+            </p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Genres :</strong>{" "}
+              {getGenreNames(movie.genre_ids) || "No genres available."}
+            </p>
+            <p className="mt-4 mb-4">
+              <strong className="text-yellow-200">Overview :</strong>{" "}
+              {movie.overview || "No overview available."}
+            </p>
+            <div>
+              <button
+                className="bg-light-100/9 font-bold hover:bg-light-100/5 text-white-500 cursor-pointer hover:scale-105 transition-all py-5 px-15 rounded-xl mb-5"
+                onClick={() => setIsPlaying(true)}
+              >
+                Play Movie
+              </button>
+            </div>
           </div>
-          <button className="bg-light-100/9 font-bold hover:bg-light-100/5 cursor-pointer hover:scale-105 transition-all py-5 px-15 rounded-xl mb-5"
-            onClick={()=> setIsPlaying(true)}
-          >
-            Play Movie
-          </button>
         </div>
 
         {/* Movie Player Modal - only if paid */}
