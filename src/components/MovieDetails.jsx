@@ -50,10 +50,6 @@ const MovieDetails = ({ movie, onClose }) => {
 
   const embedUrl = `https://multiembed.mov/?video_id=${movie.id}&tmdb=1`;
 
-  const handlePaymentConfirmation = () => {
-    setHasPaid(true);
-    setIsPlaying(true);
-  };
 
   return (
     <div className="movie-card mt-20 bg-grey bg-opacity-70 flex z-50 justify-center items-center" id="movie-details-find">
@@ -81,10 +77,15 @@ const MovieDetails = ({ movie, onClose }) => {
             <p className="mt-4 mb-4"><strong className="text-yellow-200">Genres :</strong> {getGenreNames(movie.genre_ids) || "No genres available."}</p>
             <p className="mt-4 mb-4"><strong className="text-yellow-200">Overview :</strong> {movie.overview || "No overview available."}</p>
           </div>
+          <button className="bg-light-100/9 font-bold hover:bg-light-100/5 cursor-pointer hover:scale-105 transition-all py-5 px-15 rounded-xl mb-5"
+            onClick={()=> setIsPlaying(true)}
+          >
+            Play Movie
+          </button>
         </div>
 
         {/* Movie Player Modal - only if paid */}
-        {isPlaying && hasPaid && (
+        {isPlaying && (
           <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 h-screen rounded-xl">
             <div className="relative w-full max-w-2xl bg-black">
               <button
