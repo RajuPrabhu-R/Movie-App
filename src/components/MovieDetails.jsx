@@ -48,7 +48,7 @@ const MovieDetails = ({ movie, onClose }) => {
 
   if (!movie) return null;
 
-  const embedUrl = `https://multiembed.mov/?video_id=${movie.id}&tmdb=1`;
+  const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}`;
 
   return (
     <div
