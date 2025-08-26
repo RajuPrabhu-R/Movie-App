@@ -9,7 +9,6 @@ const MovieDetails = ({ movie, onClose }) => {
   const [genres, setGenres] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [hasPaid, setHasPaid] = useState(false);
 
   useEffect(() => {
     const fetchCastAndGenres = async () => {
@@ -134,20 +133,6 @@ const MovieDetails = ({ movie, onClose }) => {
         </div>
 
         {/* UPI Payment Section */}
-        {!hasPaid && (
-          <div className="mt-8 text-center">
-            <h4 className="text-yellow-200 text-lg mb-2">Pay to Unlock Movie</h4>
-            <p className="text-white mb-2">Send payment via Google Pay UPI to:</p>
-            <p className="text-white font-bold text-lg">rajuprabhu334381470@okhdfcbank</p>
-            <p className="text-white mt-2">After payment, click "Confirm Payment" to play the movie.</p>
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-4"
-              onClick={handlePaymentConfirmation}
-            >
-              Confirm Payment
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
