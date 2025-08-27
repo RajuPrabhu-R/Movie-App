@@ -47,6 +47,8 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [searchPage, setSearchPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const loadData = async () => {
@@ -72,8 +74,21 @@ const App = () => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
-    const results = await fetchMovies(`/search/multi?query=${encodeURIComponent(searchTerm)}&`);
-    setSearchResults(results);
+
+    const res = await fetch(`${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=1&api_key=${API_KEY}`);
+    const data = await res.json();
+    setSearchResults(data.results || []);
+    setSearchPage(1);
+    setTotalPages(data.total_pages || 1);
+  };
+
+  const loadMoreSearchResults = async () => {
+    const nextPage = searchPage + 1;
+    const res = await fetch(`${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=${nextPage}&api_key=${API_KEY}`);
+    const data = await res.json();
+
+    setSearchResults((prev) => [...prev, ...(data.results || [])]);
+    setSearchPage(nextPage);
   };
 
   return (
@@ -124,11 +139,23 @@ const App = () => {
 
       <div className="wrapper max-w-6xl mx-auto p-4">
         {searchResults.length > 0 ? (
-          <MovieRow
-            title={`Search Results for "${searchTerm}"`}
-            movies={searchResults}
-            onClick={setSelectedMovie}
-          />
+          <>
+            <MovieRow
+              title={`Search Results for "${searchTerm}"`}
+              movies={searchResults}
+              onClick={setSelectedMovie}
+            />
+            {searchPage < totalPages && (
+              <div className="flex justify-center my-6">
+                <button
+                  onClick={loadMoreSearchResults}
+                  className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <>
             <MovieRow title="Trending Movies" movies={trending} onClick={setSelectedMovie} />
