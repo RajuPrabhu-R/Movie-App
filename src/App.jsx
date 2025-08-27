@@ -17,19 +17,14 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [page, setPage] = useState(1);
 
-  // Home page rows
-  const [trending, setTrending] = useState([]);
-  const [netflix, setNetflix] = useState([]);
-  const [prime, setPrime] = useState([]);
-  const [actionMovies, setActionMovies] = useState([]);
-
-  // Debounce search
+  // Debounce
   useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
 
   // Fetch movies
   const fetchMovies = async (query = "", page = 1) => {
     setIsLoading(true);
     setErrorMessage("");
+
     try {
       const endpoint = query
         ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
@@ -37,10 +32,12 @@ const App = () => {
           )}&page=${page}&api_key=${API_KEY}`
         : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}&api_key=${API_KEY}`;
 
-      const res = await fetch(endpoint);
-      if (!res.ok) throw new Error("Failed to fetch movies");
+      const response = await fetch(endpoint);
 
-      const data = await res.json();
+      if (!response.ok) throw new Error("Failed to fetch movies");
+
+      const data = await response.json();
+
       setMovieList((prev) =>
         page === 1 ? data.results : [...prev, ...data.results]
       );
@@ -51,41 +48,7 @@ const App = () => {
     }
   };
 
-  // Fetch categories
-  useEffect(() => {
-    const fetchHomeData = async () => {
-      try {
-        const [trendingRes, netflixRes, primeRes, actionRes] =
-          await Promise.all([
-            fetch(`${API_BASE_URL}/trending/movie/week?api_key=${API_KEY}`),
-            fetch(
-              `${API_BASE_URL}/discover/movie?with_networks=213&api_key=${API_KEY}`
-            ), // Netflix
-            fetch(
-              `${API_BASE_URL}/discover/movie?with_networks=1024&api_key=${API_KEY}`
-            ), // Prime
-            fetch(
-              `${API_BASE_URL}/discover/movie?with_genres=28&api_key=${API_KEY}`
-            ), // Action
-          ]);
-
-        const trendingData = await trendingRes.json();
-        const netflixData = await netflixRes.json();
-        const primeData = await primeRes.json();
-        const actionData = await actionRes.json();
-
-        setTrending(trendingData.results || []);
-        setNetflix(netflixData.results || []);
-        setPrime(primeData.results || []);
-        setActionMovies(actionData.results || []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchHomeData();
-  }, []);
-
-  // Fetch on search
+  // Fetch on search term
   useEffect(() => {
     setPage(1);
     fetchMovies(debouncedSearchTerm, 1);
@@ -94,7 +57,7 @@ const App = () => {
   return (
     <main className="min-h-screen bg-gray-900 text-white relative z-0">
       <div className="wrapper max-w-6xl mx-auto p-4">
-        {/* Search */}
+        {/* Search Box */}
         <header className="relative z-50">
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
@@ -110,18 +73,19 @@ const App = () => {
         </Suspense>
 
         {/* Search Results */}
-        {debouncedSearchTerm ? (
+        {debouncedSearchTerm && (
           <section className="mt-10">
             <h2 className="text-2xl font-bold mb-2">
               Search Results for "{debouncedSearchTerm}"
             </h2>
+
             {isLoading && page === 1 ? (
               <Spinner />
             ) : errorMessage ? (
               <p className="text-red-500">{errorMessage}</p>
             ) : movieList.length > 0 ? (
               <>
-                {/* ✅ Horizontal row */}
+                {/* ✅ Horizontal scroll row instead of grid */}
                 <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
                   {movieList.map((movie) => (
                     <div
@@ -139,7 +103,7 @@ const App = () => {
                   ))}
                 </div>
 
-                {/* Load More */}
+                {/* ✅ Load More button */}
                 <div className="mt-6 flex justify-center">
                   <button
                     onClick={() => {
@@ -158,31 +122,6 @@ const App = () => {
               <p>No results found.</p>
             )}
           </section>
-        ) : (
-          <>
-            {/* ✅ Homepage Rows with horizontal scroll */}
-            <MovieRowScroll
-              title="Trending Movies"
-              movies={trending}
-              onClick={setSelectedMovie}
-              isTrending={true}
-            />
-            <MovieRowScroll
-              title="Netflix Movies"
-              movies={netflix}
-              onClick={setSelectedMovie}
-            />
-            <MovieRowScroll
-              title="Prime Movies"
-              movies={prime}
-              onClick={setSelectedMovie}
-            />
-            <MovieRowScroll
-              title="Action Movies"
-              movies={actionMovies}
-              onClick={setSelectedMovie}
-            />
-          </>
         )}
       </div>
     </main>
@@ -190,3 +129,4 @@ const App = () => {
 };
 
 export default App;
+
