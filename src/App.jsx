@@ -1,13 +1,13 @@
-// App.jsx
-import React, { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import React from "react";
+import Search from "./components/Search.jsx";
+import Spinner from "./components/Spinner.jsx";
+import MovieCard from "./components/MovieCard.jsx";
 import { useDebounce } from "react-use";
 
-// Lazy load MovieDetails component
 const MovieDetails = React.lazy(() => import("./components/MovieDetails.jsx"));
-
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-
 const API_OPTIONS = {
   method: "GET",
   headers: {
@@ -18,194 +18,92 @@ const API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [movieList, setMovieList] = useState([]);
-  const [selectedMovie, setSelectedMovie] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [movieList, setMovieList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState(null);
 
-  useDebounce(() => {
-    setCurrentPage(1);
-    setDebouncedSearchTerm(searchTerm);
-  }, 500, [searchTerm]);
+  useDebounce(() => setDebouncedSearchTerm(searchTerm), 500, [searchTerm]);
+
+  const fetchMovies = async (query = "") => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const endpoint = query
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
+            query
+          )}&api_key=${API_KEY}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+
+      const response = await fetch(endpoint, API_OPTIONS);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
+      }
+
+      const data = await response.json();
+      if (data.Response === "False") {
+        setErrorMessage(data.Error || "Failed to fetch movies");
+        setMovieList([]);
+        return;
+      }
+      setMovieList(data.results || []);
+    } catch (error) {
+      console.error(`Error fetching movies: ${error}`);
+      setErrorMessage("Error fetching movies. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      setIsLoading(true);
-      setErrorMessage("");
-      try {
-        const endpoint = debouncedSearchTerm
-          ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(
-              debouncedSearchTerm
-            )}&page=${currentPage}`
-          : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${currentPage}`;
-
-        const response = await fetch(endpoint, API_OPTIONS);
-
-        if (!response.ok) throw new Error("Failed to fetch movies");
-
-        const data = await response.json();
-        if (data.results?.length === 0) {
-          setErrorMessage("No movies found.");
-          setMovieList([]);
-          return;
-        }
-
-        setMovieList(data.results || []);
-        setTotalPages(data.total_pages || 1);
-      } catch (error) {
-        console.error("Error:", error);
-        setErrorMessage("Failed to fetch movies.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMovies();
-  }, [debouncedSearchTerm, currentPage]);
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   return (
-    <main className="p-6 max-w-screen-xl mx-auto">
-      <header className="mb-6">
-        <input
-          type="text"
-          placeholder="Search movies..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded"
-        />
-      </header>
+    <main> 
+      <div className="wrapper">
+        <header>
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        </header>
 
-      <Suspense fallback={<p className="text-white">Loading movie details...</p>}>
-        {selectedMovie && (
-          <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
-        )}
-      </Suspense>
-
-      <section>
-        <h2 className="text-2xl font-bold mb-4">All Movies</h2>
-
-        {isLoading ? (
-          <p className="text-center">Loading...</p>
-        ) : errorMessage ? (
-          <p className="text-red-500">{errorMessage}</p>
-        ) : (
-          <>
-            <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <section className="all-movies">
+          <Suspense
+            fallback={
+              <div>
+                <p className="text-white">Loading Movies</p>
+              </div>
+            }
+          >
+            {selectedMovie && (
+              <MovieDetails
+                movie={selectedMovie}
+                onClose={() => setSelectedMovie(null)}
+              />
+            )}
+          </Suspense>
+          <h2 className="mt-20">All Movies</h2>
+          {isLoading ? (
+            <Spinner />
+          ) : errorMessage ? (
+            <p className="text-red-500">{errorMessage}</p>
+          ) : (
+            <ul>
               {movieList.map((movie) => (
-                <li key={movie.id}>
-                  <MovieCard
-                    movie={movie}
-                    onClick={() => setSelectedMovie(movie)}
-                  />
-                </li>
+                <MovieCard
+                  key={movie.id}
+                  movie={movie}
+                  onClick={() => setSelectedMovie(movie)}
+                />
               ))}
             </ul>
-
-            {/* Pagination */}
-            <div className="pagination mt-10 flex flex-wrap justify-center items-center gap-2">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-              >
-                Prev
-              </button>
-
-              {Array.from({ length: totalPages > 5 ? 5 : totalPages }).map((_, index) => {
-                let page = index + 1;
-
-                if (currentPage > 3 && totalPages > 5) {
-                  if (currentPage + 2 <= totalPages) {
-                    page = currentPage - 2 + index;
-                  } else {
-                    page = totalPages - 4 + index;
-                  }
-                }
-
-                return (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded ${
-                      page === currentPage ? "bg-blue-500 text-white" : "bg-gray-200"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-
-              {totalPages > 5 && currentPage + 2 < totalPages && (
-                <>
-                  <span className="px-2">...</span>
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    className={`px-3 py-1 rounded ${
-                      currentPage === totalPages ? "bg-blue-500 text-white" : "bg-gray-200"
-                    }`}
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              )}
-
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-      </section>
+          )}
+        </section>
+      </div>
     </main>
   );
 };
 
 export default App;
-
-// --- MovieCard Component ---
-const MovieCard = ({
-  movie: { title, poster_path, vote_average, release_date, original_language },
-  onClick,
-}) => {
-  return (
-    <div
-      className="movie-card hover:scale-105 transition-transform duration-300 cursor-pointer"
-      onClick={onClick}
-    >
-      <img
-        src={
-          poster_path
-            ? `https://image.tmdb.org/t/p/w500/${poster_path}`
-            : "/No-Poster.png"
-        }
-        alt={title}
-        className="w-full h-auto rounded"
-      />
-      <div className="mt-3">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <div className="text-sm text-gray-600 flex gap-2 items-center flex-wrap">
-          <span>⭐ {vote_average?.toFixed(1) || "N/A"} / 10</span>
-          <span>•</span>
-          <span>{original_language?.toUpperCase()}</span>
-          <span>•</span>
-          <span>{release_date ? release_date.split("-")[0] : "N/A"}</span>
-        </div>
-      </div>
-    </div>
-  );
-};
