@@ -12,122 +12,147 @@ const MovieDetails = ({ movie, onClose }) => {
 
   useEffect(() => {
     const fetchCastAndGenres = async () => {
-      if (movie) {
-        setLoading(true);
-        setError("");
-        try {
-          const castResponse = await axios.get(
-            `${API_BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}`
-          );
-          setCast(castResponse.data.cast);
+      if (!movie) return;
+      setLoading(true);
+      setError("");
+      try {
+        const castResponse = await axios.get(
+          `${API_BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}`
+        );
+        setCast(castResponse.data.cast);
 
-          const genresResponse = await axios.get(
-            `${API_BASE_URL}/genre/movie/list?api_key=${API_KEY}`
-          );
-          setGenres(genresResponse.data.genres);
-        } catch (error) {
-          setError("Failed to fetch data. Please try again later.");
-        } finally {
-          setLoading(false);
-        }
+        const genresResponse = await axios.get(
+          `${API_BASE_URL}/genre/movie/list?api_key=${API_KEY}`
+        );
+        setGenres(genresResponse.data.genres);
+      } catch (err) {
+        setError("Failed to fetch details. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCastAndGenres();
   }, [movie, API_KEY]);
 
-  const getGenreNames = (genreIds) => {
-    return genreIds
+  if (!movie) return null;
+
+  const getGenreNames = (ids) =>
+    ids
       .map((id) => {
-        const genre = genres.find((g) => g.id === id);
-        return genre ? genre.name : null;
+        const g = genres.find((x) => x.id === id);
+        return g ? g.name : null;
       })
       .filter(Boolean)
       .join(", ");
-  };
-
-  if (!movie) return null;
 
   const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}`;
 
   return (
-    <div
-      className="movie-card mt-20 bg-grey bg-opacity-70 flex z-50 justify-center items-center"
-      id="movie-details-find"
-    >
-      <div className="bg-dark-100 rounded-lg w-full max-w-4xl relative">
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-start z-50 overflow-y-auto p-6">
+      <div className="bg-gray-900 rounded-lg w-full max-w-4xl relative shadow-lg">
+        {/* Close button */}
         <button
-          className="absolute top-3 -right-10 text-white text-3xl w-10 h-10 bg-gray-500 rounded-full hover:text-red-500"
+          className="absolute top-3 right-3 text-white text-3xl hover:text-red-500"
           onClick={onClose}
         >
           &times;
         </button>
-        <h2 className="text-white mb-4 text-center">{movie.title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative cursor-pointer mt-10">
-            <img
-              src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
-              alt={movie.title}
-              className="rounded-lg object-cover w-full"
-            />
-          </div>
-          <div className="text-white mt-10">
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Language :</strong>{" "}
-              {movie.original_language.toUpperCase()}
+
+        {/* Title */}
+        <h2 className="text-white text-2xl font-bold text-center mt-4">
+          {movie.title || movie.name}
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+          {/* Poster */}
+          <img
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            alt={movie.title}
+            className="rounded-lg object-cover w-full"
+          />
+
+          {/* Info */}
+          <div className="text-white space-y-3">
+            <p>
+              <span className="text-yellow-400 font-semibold">Language:</span>{" "}
+              {movie.original_language?.toUpperCase()}
             </p>
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Popularity :</strong>{" "}
-              {movie.popularity.toFixed(1)}
+            <p>
+              <span className="text-yellow-400 font-semibold">Popularity:</span>{" "}
+              {movie.popularity?.toFixed(1)}
             </p>
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Release Date :</strong>{" "}
-              {movie.release_date}
+            <p>
+              <span className="text-yellow-400 font-semibold">Release:</span>{" "}
+              {movie.release_date || movie.first_air_date}
             </p>
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Rating :</strong>{" "}
-              {movie.vote_average.toFixed(1)} / 10
+            <p>
+              <span className="text-yellow-400 font-semibold">Rating:</span>{" "}
+              {movie.vote_average?.toFixed(1)} / 10
             </p>
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Genres :</strong>{" "}
-              {getGenreNames(movie.genre_ids) || "No genres available."}
+            <p>
+              <span className="text-yellow-400 font-semibold">Genres:</span>{" "}
+              {getGenreNames(movie.genre_ids) || "N/A"}
             </p>
-            <p className="mt-4 mb-4">
-              <strong className="text-yellow-200">Overview :</strong>{" "}
+            <p>
+              <span className="text-yellow-400 font-semibold">Overview:</span>{" "}
               {movie.overview || "No overview available."}
             </p>
-            <div>
-              <button
-                className="bg-light-100/9 font-bold hover:bg-light-100/5 text-white-500 cursor-pointer hover:scale-105 transition-all py-5 px-15 rounded-xl mb-5"
-                onClick={() => setIsPlaying(true)}
-              >
-                Play Movie
-              </button>
-            </div>
+
+            <button
+              className="bg-blue-600 px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+              onClick={() => setIsPlaying(true)}
+            >
+              ▶ Play
+            </button>
           </div>
         </div>
 
-        {/* Movie Player Modal - only if paid */}
+        {/* Cast */}
+        {cast.length > 0 && (
+          <div className="p-6">
+            <h3 className="text-white text-xl font-bold mb-4">Cast</h3>
+            <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
+              {cast.slice(0, 10).map((actor) => (
+                <div key={actor.id} className="flex-shrink-0 w-24 text-center">
+                  <img
+                    src={
+                      actor.profile_path
+                        ? `https://image.tmdb.org/t/p/w300${actor.profile_path}`
+                        : "https://via.placeholder.com/150"
+                    }
+                    alt={actor.name}
+                    className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+                  />
+                  <p className="text-sm">{actor.name}</p>
+                  <p className="text-xs text-gray-400">{actor.character}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Player Modal */}
         {isPlaying && (
-          <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 h-screen rounded-xl">
-            <div className="relative w-full max-w-2xl bg-black">
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
+            <div className="relative w-full max-w-3xl">
               <button
-                className="absolute -top-20 right-5 text-white text-4xl w-10 h-10 bg-gray-500 rounded-full hover:text-red-500"
+                className="absolute -top-12 right-0 text-white text-3xl hover:text-red-500"
                 onClick={() => setIsPlaying(false)}
               >
                 &times;
               </button>
               {loading ? (
-                <div className="text-white text-center">Loading movie...</div>
+                <div className="text-white text-center">Loading...</div>
               ) : error ? (
-                <div className="text-white text-center">{error}</div>
+                <div className="text-red-500 text-center">{error}</div>
               ) : (
                 <iframe
-                  className="flex justify-center items-center"
                   width="100%"
-                  height="400"
+                  height="500"
                   src={embedUrl}
                   title="Movie Player"
+                  className="rounded-lg"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>
@@ -135,28 +160,6 @@ const MovieDetails = ({ movie, onClose }) => {
             </div>
           </div>
         )}
-
-        {/* Cast Section */}
-        <div className="mt-6">
-          <h3 className="text-white text-center text-2xl mb-5">Cast</h3>
-          <div className="w-full flex gap-14 overflow-x-auto hide-scrollbar">
-            {cast.map((actor) => (
-              <div key={actor.id} className="md:w-1/4 flex-shrink-0">
-                <img
-                  src={`https://image.tmdb.org/t/p/w500/${actor.profile_path}`}
-                  alt={actor.name}
-                  className="w-25 h-25 rounded-full object-cover mx-auto"
-                />
-                <p className="text-white text-center">{actor.name}</p>
-                <p className="text-white-500 my-3 text-center text-sm bg-gray-500 rounded-2xl">
-                  <div>{actor.character}</div>
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* UPI Payment Section */}
       </div>
     </div>
   );
