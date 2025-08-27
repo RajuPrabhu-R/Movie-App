@@ -147,28 +147,7 @@ const App = () => {
         <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
         {/* Providers */}
-        <section className="flex gap-6 justify-center my-6">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg"
-            alt="Netflix"
-            className="h-10"
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg"
-            alt="Disney+"
-            className="h-10"
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png"
-            alt="Prime Video"
-            className="h-10"
-          />
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/1/19/HBO_Max_Logo.svg"
-            alt="HBO Max"
-            className="h-10"
-          />
-        </section>
+        
 
         {/* ✅ If searching, show horizontal scroll results */}
         {searchResults.length > 0 ? (
