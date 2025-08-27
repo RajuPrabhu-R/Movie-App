@@ -92,6 +92,66 @@ const App = () => {
     fetchMovies(debouncedSearchTerm, 1);
   }, [debouncedSearchTerm]);
 
+  // ✅ Hero Row (Top Section Horizontal Scroll)
+  const HeroRow = ({ movies }) => {
+    const scrollRef = useRef(null);
+
+    const scroll = (dir) => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollBy({
+          left: dir === "left" ? -600 : 600,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    if (!movies.length) return null;
+
+    return (
+      <section className="relative mb-12">
+        {/* Left/Right buttons */}
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 p-3 rounded-full hover:bg-black"
+        >
+          <ChevronLeft size={28} />
+        </button>
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/50 p-3 rounded-full hover:bg-black"
+        >
+          <ChevronRight size={28} />
+        </button>
+
+        {/* Horizontal Hero Scroll */}
+        <div
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto hide-scrollbar scroll-smooth"
+        >
+          {movies.map((movie) => (
+            <div
+              key={movie.id}
+              className="min-w-[80%] md:min-w-[60%] relative cursor-pointer"
+              onClick={() => setSelectedMovie(movie)}
+            >
+              <img
+                src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
+                alt={movie.title}
+                className="rounded-2xl object-cover w-full h-[400px]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl flex items-end p-6">
+                <div>
+                  <h2 className="text-2xl md:text-4xl font-bold">{movie.title}</h2>
+                  <p className="text-sm line-clamp-2 max-w-lg">{movie.overview}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
   // ✅ Reusable Horizontal Scroll Row
   const MovieRow = ({ title, movies, isTrending = false }) => {
     const scrollRef = useRef(null);
@@ -229,6 +289,9 @@ const App = () => {
           </section>
         ) : (
           <>
+            {/* ✅ Hero Top Scroll Section */}
+            <HeroRow movies={trending} />
+
             {/* ✅ Homepage Rows */}
             <MovieRow title="Trending Movies" movies={trending} isTrending />
             <MovieRow title="Netflix Movies" movies={netflix} />
