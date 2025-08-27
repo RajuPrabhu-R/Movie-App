@@ -176,3 +176,36 @@ const App = () => {
 };
 
 export default App;
+
+// --- MovieCard Component ---
+const MovieCard = ({
+  movie: { title, poster_path, vote_average, release_date, original_language },
+  onClick,
+}) => {
+  return (
+    <div
+      className="movie-card hover:scale-105 transition-transform duration-300 cursor-pointer"
+      onClick={onClick}
+    >
+      <img
+        src={
+          poster_path
+            ? `https://image.tmdb.org/t/p/w500/${poster_path}`
+            : "/No-Poster.png"
+        }
+        alt={title}
+        className="w-full h-auto rounded"
+      />
+      <div className="mt-3">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <div className="text-sm text-gray-600 flex gap-2 items-center flex-wrap">
+          <span>⭐ {vote_average?.toFixed(1) || "N/A"} / 10</span>
+          <span>•</span>
+          <span>{original_language?.toUpperCase()}</span>
+          <span>•</span>
+          <span>{release_date ? release_date.split("-")[0] : "N/A"}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
