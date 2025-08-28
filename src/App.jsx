@@ -30,7 +30,7 @@ const MovieCard = ({ movie, onClick }) => (
 const MovieRow = ({ title, movies, onClick }) => (
   <section className="mt-8">
     <h2 className="text-xl font-semibold mb-3">{title}</h2>
-    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-4 overflow-x-auto pb-2">
       {movies.map((movie) => (
         <div className="min-w-[160px] flex-shrink-0" key={movie.id}>
           <MovieCard movie={movie} onClick={onClick} />
@@ -121,12 +121,12 @@ const App = () => {
 
   return (
     <main className="min-h-screen bg-dark text-white">
-      {/* Inject CSS for hiding scrollbars */}
+      {/* Global scrollbar hide */}
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
+        ::-webkit-scrollbar {
           display: none;
         }
-        .scrollbar-hide {
+        * {
           -ms-overflow-style: none; /* IE and Edge */
           scrollbar-width: none; /* Firefox */
         }
@@ -258,10 +258,7 @@ const App = () => {
 
       {/* Movie Details Modal */}
       {selectedMovie && (
-        <MovieDetails
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-        />
+        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       )}
     </main>
   );
