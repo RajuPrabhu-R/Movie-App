@@ -120,7 +120,7 @@ const App = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white">
+    <main className="min-h-screen bg-dark text-white">
       {/* Hero Banner */}
       {heroMovie && (
         <div
