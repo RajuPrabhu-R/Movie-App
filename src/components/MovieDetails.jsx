@@ -17,12 +17,12 @@ const MovieDetails = ({ movie, onClose }) => {
       setError("");
       try {
         const castResponse = await axios.get(
-          ${API_BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}
+          `${API_BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}`
         );
         setCast(castResponse.data.cast);
 
         const genresResponse = await axios.get(
-          ${API_BASE_URL}/genre/movie/list?api_key=${API_KEY}
+          `${API_BASE_URL}/genre/movie/list?api_key=${API_KEY}`
         );
         setGenres(genresResponse.data.genres);
       } catch (err) {
@@ -46,7 +46,7 @@ const MovieDetails = ({ movie, onClose }) => {
       .filter(Boolean)
       .join(", ");
 
-  const embedUrl = https://player.vidplus.to/embed/movie/${movie.id};
+  const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-start z-50 overflow-y-auto p-6">
@@ -67,7 +67,7 @@ const MovieDetails = ({ movie, onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
           {/* Poster */}
           <img
-            src={https://image.tmdb.org/t/p/w500${movie.poster_path}}
+            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title}
             className="rounded-lg object-cover w-full"
           />
@@ -118,7 +118,7 @@ const MovieDetails = ({ movie, onClose }) => {
                   <img
                     src={
                       actor.profile_path
-                        ? https://image.tmdb.org/t/p/w300${actor.profile_path}
+                        ? `https://image.tmdb.org/t/p/w300${actor.profile_path}`
                         : "https://via.placeholder.com/150"
                     }
                     alt={actor.name}
