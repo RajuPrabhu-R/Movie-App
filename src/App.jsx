@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import MovieDetails from "./components/MovieDetails";
+import MovieDetails from "./components/MovieDetails"; // Make sure this exists
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -85,7 +85,7 @@ const App = () => {
 
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % trending.length);
-    }, 5000);
+    }, 5000); // 5 seconds
 
     return () => clearInterval(interval);
   }, [trending, heroIndex]);
@@ -119,17 +119,6 @@ const App = () => {
     setSearchPage(nextPage);
   };
 
-  // If a movie is selected → show MovieDetails page
-  if (selectedMovie) {
-    return (
-      <MovieDetails
-        movie={selectedMovie}
-        onClose={() => setSelectedMovie(null)}
-      />
-    );
-  }
-
-  // Otherwise → show home view
   return (
     <main className="min-h-screen bg-dark text-white">
       {/* Hero Banner */}
@@ -257,6 +246,11 @@ const App = () => {
           </>
         )}
       </div>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+      )}
     </main>
   );
 };
