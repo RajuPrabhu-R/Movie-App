@@ -121,6 +121,17 @@ const App = () => {
 
   return (
     <main className="min-h-screen bg-dark text-white">
+      {/* Inject CSS for hiding scrollbars */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+      `}</style>
+
       {/* Hero Banner */}
       {heroMovie && (
         <div
@@ -146,9 +157,7 @@ const App = () => {
           <div className="absolute top-1/2 left-0 right-0 flex justify-between px-4">
             <button
               onClick={() =>
-                setHeroIndex(
-                  (heroIndex - 1 + trending.length) % trending.length
-                )
+                setHeroIndex((heroIndex - 1 + trending.length) % trending.length)
               }
               className="bg-black/50 px-3 py-2 rounded-full"
             >
@@ -249,7 +258,10 @@ const App = () => {
 
       {/* Movie Details Modal */}
       {selectedMovie && (
-        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+        <MovieDetails
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
     </main>
   );
