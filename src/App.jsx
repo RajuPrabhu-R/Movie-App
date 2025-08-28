@@ -75,7 +75,9 @@ const App = () => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
 
-    const res = await fetch(`${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=1&api_key=${API_KEY}`);
+    const res = await fetch(
+      `${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=1&api_key=${API_KEY}`
+    );
     const data = await res.json();
     setSearchResults(data.results || []);
     setSearchPage(1);
@@ -84,7 +86,9 @@ const App = () => {
 
   const loadMoreSearchResults = async () => {
     const nextPage = searchPage + 1;
-    const res = await fetch(`${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=${nextPage}&api_key=${API_KEY}`);
+    const res = await fetch(
+      `${API_BASE_URL}/search/multi?query=${encodeURIComponent(searchTerm)}&page=${nextPage}&api_key=${API_KEY}`
+    );
     const data = await res.json();
 
     setSearchResults((prev) => [...prev, ...(data.results || [])]);
@@ -160,7 +164,17 @@ const App = () => {
           <>
             <MovieRow title="Trending Movies" movies={trending} onClick={setSelectedMovie} />
             <MovieRow title="Trending TV Shows" movies={tvShows} onClick={setSelectedMovie} />
-            <MovieRow title="Netflix Originals" movies={netflix} onClick={setSelectedMovie} />
+
+            {/* Custom Netflix Grid */}
+            <section className="mt-6">
+              <h2 className="text-xl font-bold mb-3">Netflix Originals</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {netflix.map((movie) => (
+                  <MovieCard key={movie.id} movie={movie} onClick={setSelectedMovie} />
+                ))}
+              </div>
+            </section>
+
             <MovieRow title="Amazon Prime Shows" movies={prime} onClick={setSelectedMovie} />
             <MovieRow title="Apple TV+ Shows" movies={apple} onClick={setSelectedMovie} />
             <MovieRow title="Disney+ Shows" movies={disney} onClick={setSelectedMovie} />
