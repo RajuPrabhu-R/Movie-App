@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
-import MovieDetails from "./components/MovieDetails"; // Ensure this exists
+import MovieDetails from "./components/MovieDetails"; // Make sure this component exists
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
+// Fetch data helper
 const fetchMovies = async (endpoint) => {
   const res = await fetch(`${API_BASE_URL}${endpoint}&api_key=${API_KEY}`);
   const data = await res.json();
   return data.results || [];
 };
 
+// Movie card component
 const MovieCard = ({ movie, onClick }) => (
   <div
     className="rounded-lg overflow-hidden shadow-md cursor-pointer hover:scale-105 transition"
@@ -24,6 +26,21 @@ const MovieCard = ({ movie, onClick }) => (
   </div>
 );
 
+// Row with horizontal scroll
+const MovieRow = ({ title, movies, onClick }) => (
+  <section className="mt-8">
+    <h2 className="text-xl font-semibold mb-3">{title}</h2>
+    <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      {movies.map((movie) => (
+        <div className="min-w-[160px] flex-shrink-0" key={movie.id}>
+          <MovieCard movie={movie} onClick={onClick} />
+        </div>
+      ))}
+    </div>
+  </section>
+);
+
+// Main App
 const App = () => {
   const [heroMovie, setHeroMovie] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -31,30 +48,29 @@ const App = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchPage, setSearchPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [allMovies, setAllMovies] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const [tv, setTv] = useState([]);
+  const [netflix, setNetflix] = useState([]);
+  const [prime, setPrime] = useState([]);
+  const [apple, setApple] = useState([]);
+  const [disney, setDisney] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
-      const trending = await fetchMovies("/trending/movie/week?");
-      const tv = await fetchMovies("/tv/popular?");
-      const netflix = await fetchMovies("/discover/tv?with_networks=213");
-      const prime = await fetchMovies("/discover/tv?with_networks=1024");
-      const apple = await fetchMovies("/discover/tv?with_networks=2552");
-      const disney = await fetchMovies("/discover/tv?with_networks=2739");
+      const trendingData = await fetchMovies("/trending/movie/week?");
+      const tvData = await fetchMovies("/tv/popular?");
+      const netflixData = await fetchMovies("/discover/tv?with_networks=213");
+      const primeData = await fetchMovies("/discover/tv?with_networks=1024");
+      const appleData = await fetchMovies("/discover/tv?with_networks=2552");
+      const disneyData = await fetchMovies("/discover/tv?with_networks=2739");
 
-      setHeroMovie(trending[0]);
-
-      // Merge and deduplicate by ID
-      const combined = [
-        ...trending,
-        ...tv,
-        ...netflix,
-        ...prime,
-        ...apple,
-        ...disney,
-      ];
-      const unique = Array.from(new Map(combined.map(m => [m.id, m])).values());
-      setAllMovies(unique);
+      setHeroMovie(trendingData[0]);
+      setTrending(trendingData);
+      setTv(tvData);
+      setNetflix(netflixData);
+      setPrime(primeData);
+      setApple(appleData);
+      setDisney(disneyData);
     };
 
     loadData();
@@ -89,7 +105,7 @@ const App = () => {
 
   return (
     <main className="min-h-screen bg-gray-900 text-white">
-      {/* Hero Section */}
+      {/* Hero Banner */}
       {heroMovie && (
         <div
           className="relative h-[70vh] flex items-end bg-cover bg-center"
@@ -113,7 +129,7 @@ const App = () => {
         </div>
       )}
 
-      {/* Search Bar */}
+      {/* Search */}
       <form
         onSubmit={handleSearch}
         className="max-w-3xl mx-auto my-6 flex gap-2 px-4"
@@ -133,42 +149,75 @@ const App = () => {
         </button>
       </form>
 
+      {/* Main Content */}
       <div className="max-w-6xl mx-auto p-4">
-        {/* Grid Results */}
-        <section className="mt-6">
-          <h2 className="text-2xl font-bold mb-4">
-            {searchResults.length > 0
-              ? `Search Results for "${searchTerm}"`
-              : "Popular Content"}
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {(searchResults.length > 0 ? searchResults : allMovies).map(
-              (movie) => (
+        {searchResults.length > 0 ? (
+          <section className="mt-6">
+            <h2 className="text-2xl font-bold mb-4">
+              Search Results for "{searchTerm}"
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {searchResults.map((movie) => (
                 <MovieCard
                   key={movie.id}
                   movie={movie}
                   onClick={setSelectedMovie}
                 />
-              )
-            )}
-          </div>
-
-          {searchResults.length > 0 && searchPage < totalPages && (
-            <div className="flex justify-center my-6">
-              <button
-                onClick={loadMoreSearchResults}
-                className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-              >
-                Load More
-              </button>
+              ))}
             </div>
-          )}
-        </section>
+            {searchPage < totalPages && (
+              <div className="flex justify-center my-6">
+                <button
+                  onClick={loadMoreSearchResults}
+                  className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
+            <MovieRow
+              title="Trending Movies"
+              movies={trending}
+              onClick={setSelectedMovie}
+            />
+            <MovieRow
+              title="TV Shows"
+              movies={tv}
+              onClick={setSelectedMovie}
+            />
+            <MovieRow
+              title="Netflix Originals"
+              movies={netflix}
+              onClick={setSelectedMovie}
+            />
+            <MovieRow
+              title="Amazon Prime"
+              movies={prime}
+              onClick={setSelectedMovie}
+            />
+            <MovieRow
+              title="Apple TV+"
+              movies={apple}
+              onClick={setSelectedMovie}
+            />
+            <MovieRow
+              title="Disney+"
+              movies={disney}
+              onClick={setSelectedMovie}
+            />
+          </>
+        )}
       </div>
 
       {/* Movie Details Modal */}
       {selectedMovie && (
-        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+        <MovieDetails
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
     </main>
   );
