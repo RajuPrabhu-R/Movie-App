@@ -60,7 +60,7 @@ const MovieDetails = ({ movie, onClose }) => {
 
         {/* Hero Banner */}
         <div
-          className="w-full h-[75vh] md:h-[520px] bg-cover bg-center relative rounded-b-2xl"
+          className="w-full h-[70vh] md:h-[520px] bg-cover bg-center relative rounded-b-2xl"
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
           }}
