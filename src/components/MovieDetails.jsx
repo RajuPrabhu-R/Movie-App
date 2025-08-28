@@ -43,64 +43,59 @@ const MovieDetails = ({ movie, onClose }) => {
         const g = genres.find((x) => x.id === id);
         return g ? g.name : null;
       })
-      .filter(Boolean)
-      .join(", ");
+      .filter(Boolean);
 
   const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}`;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-start z-50 overflow-y-auto p-6">
-      <div className="bg-gray-900 rounded-lg w-full max-w-4xl relative shadow-lg">
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-start z-50 overflow-y-auto">
+      <div className="relative w-full max-w-5xl">
         {/* Close button */}
         <button
-          className="absolute top-3 right-3 text-white text-3xl hover:text-red-500"
+          className="absolute top-5 right-5 text-white text-4xl hover:text-red-500 z-50"
           onClick={onClose}
         >
           &times;
         </button>
 
-        {/* Title */}
-        <h2 className="text-white text-2xl font-bold text-center mt-4">
-          {movie.title || movie.name}
-        </h2>
+        {/* Hero Banner */}
+        <div
+          className="w-full h-[75vh] md:h-[520px] bg-cover bg-center relative rounded-b-2xl"
+          style={{
+            backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent rounded-b-2xl"></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          {/* Poster */}
-          <img
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-            alt={movie.title}
-            className="rounded-lg object-cover w-full"
-          />
+          {/* Title & Info (BOTTOM LEFT) */}
+          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-12 text-white max-w-3xl">
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-2 drop-shadow-lg">
+              {movie.title || movie.name}
+            </h2>
+            <p className="text-yellow-400 font-semibold text-lg">
+              ⭐ {movie.vote_average?.toFixed(1)} / 10
+            </p>
 
-          {/* Info */}
-          <div className="text-white space-y-3">
-            <p>
-              <span className="text-yellow-400 font-semibold">Language:</span>{" "}
-              {movie.original_language?.toUpperCase()}
-            </p>
-            <p>
-              <span className="text-yellow-400 font-semibold">Popularity:</span>{" "}
-              {movie.popularity?.toFixed(1)}
-            </p>
-            <p>
-              <span className="text-yellow-400 font-semibold">Release:</span>{" "}
-              {movie.release_date || movie.first_air_date}
-            </p>
-            <p>
-              <span className="text-yellow-400 font-semibold">Rating:</span>{" "}
-              {movie.vote_average?.toFixed(1)} / 10
-            </p>
-            <p>
-              <span className="text-yellow-400 font-semibold">Genres:</span>{" "}
-              {getGenreNames(movie.genre_ids) || "N/A"}
-            </p>
-            <p>
-              <span className="text-yellow-400 font-semibold">Overview:</span>{" "}
+            {/* Genre Tags */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {getGenreNames(movie.genre_ids).map((genre) => (
+                <span
+                  key={genre}
+                  className="bg-red-600 px-3 py-1 rounded-full text-sm"
+                >
+                  {genre}
+                </span>
+              ))}
+            </div>
+
+            {/* Overview */}
+            <p className="mt-4 text-gray-200 text-sm md:text-base line-clamp-3">
               {movie.overview || "No overview available."}
             </p>
 
+            {/* Play Button */}
             <button
-              className="bg-blue-600 px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="mt-5 bg-white text-black font-bold px-6 py-3 rounded-lg hover:bg-gray-300 transition"
               onClick={() => setIsPlaying(true)}
             >
               ▶ Play
@@ -108,7 +103,7 @@ const MovieDetails = ({ movie, onClose }) => {
           </div>
         </div>
 
-        {/* Cast */}
+        {/* Cast Section */}
         {cast.length > 0 && (
           <div className="p-6">
             <h3 className="text-white text-xl font-bold mb-4">Cast</h3>
