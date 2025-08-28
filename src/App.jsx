@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import MovieDetails from "./components/MovieDetails"; // Make sure this component exists
+import MovieDetails from "./components/MovieDetails"; // Make sure this exists
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -26,7 +26,7 @@ const MovieCard = ({ movie, onClick }) => (
   </div>
 );
 
-// Row with horizontal scroll
+// Horizontal scroll row
 const MovieRow = ({ title, movies, onClick }) => (
   <section className="mt-8">
     <h2 className="text-xl font-semibold mb-3">{title}</h2>
@@ -40,9 +40,10 @@ const MovieRow = ({ title, movies, onClick }) => (
   </section>
 );
 
-// Main App
+// Main App Component
 const App = () => {
   const [heroMovie, setHeroMovie] = useState(null);
+  const [heroIndex, setHeroIndex] = useState(0);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -55,6 +56,7 @@ const App = () => {
   const [apple, setApple] = useState([]);
   const [disney, setDisney] = useState([]);
 
+  // Load initial data
   useEffect(() => {
     const loadData = async () => {
       const trendingData = await fetchMovies("/trending/movie/week?");
@@ -64,7 +66,6 @@ const App = () => {
       const appleData = await fetchMovies("/discover/tv?with_networks=2552");
       const disneyData = await fetchMovies("/discover/tv?with_networks=2739");
 
-      setHeroMovie(trendingData[0]);
       setTrending(trendingData);
       setTv(tvData);
       setNetflix(netflixData);
@@ -76,6 +77,20 @@ const App = () => {
     loadData();
   }, []);
 
+  // Auto-rotate hero banner
+  useEffect(() => {
+    if (!trending.length) return;
+
+    setHeroMovie(trending[heroIndex]);
+
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % trending.length);
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(interval);
+  }, [trending, heroIndex]);
+
+  // Handle search submit
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -91,6 +106,7 @@ const App = () => {
     setTotalPages(data.total_pages || 1);
   };
 
+  // Load more search results
   const loadMoreSearchResults = async () => {
     const nextPage = searchPage + 1;
     const res = await fetch(
@@ -108,7 +124,7 @@ const App = () => {
       {/* Hero Banner */}
       {heroMovie && (
         <div
-          className="relative h-[70vh] flex items-end bg-cover bg-center"
+          className="relative h-[70vh] flex items-end bg-cover bg-center transition-all duration-500"
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})`,
           }}
@@ -126,10 +142,29 @@ const App = () => {
               Play
             </button>
           </div>
+          {/* Manual Controls */}
+          <div className="absolute top-1/2 left-0 right-0 flex justify-between px-4">
+            <button
+              onClick={() =>
+                setHeroIndex(
+                  (heroIndex - 1 + trending.length) % trending.length
+                )
+              }
+              className="bg-black/50 px-3 py-2 rounded-full"
+            >
+              ◀
+            </button>
+            <button
+              onClick={() => setHeroIndex((heroIndex + 1) % trending.length)}
+              className="bg-black/50 px-3 py-2 rounded-full"
+            >
+              ▶
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Search */}
+      {/* Search Bar */}
       <form
         onSubmit={handleSearch}
         className="max-w-3xl mx-auto my-6 flex gap-2 px-4"
@@ -214,10 +249,7 @@ const App = () => {
 
       {/* Movie Details Modal */}
       {selectedMovie && (
-        <MovieDetails
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-        />
+        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       )}
     </main>
   );
