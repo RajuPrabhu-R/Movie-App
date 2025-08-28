@@ -60,16 +60,16 @@ const MovieDetails = ({ movie, onClose }) => {
 
         {/* Hero Banner */}
         <div
-          className="w-full h-[70vh] md:h-[520px] bg-cover bg-center relative rounded-b-2xl"
+          className="w-full h-[70vh] md:h-[500px] bg-cover bg-center relative rounded-b-2xl"
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent rounded-b-2xl"></div>
 
-          {/* Title & Info (BOTTOM LEFT) */}
-          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-12 text-white max-w-3xl">
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-2 drop-shadow-lg">
+          {/* Title & Info */}
+          <div className="absolute bottom-10 left-8 text-white max-w-3xl">
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-2">
               {movie.title || movie.name}
             </h2>
             <p className="text-yellow-400 font-semibold text-lg">
@@ -89,7 +89,7 @@ const MovieDetails = ({ movie, onClose }) => {
             </div>
 
             {/* Overview */}
-            <p className="mt-4 text-gray-200 text-sm md:text-base line-clamp-3">
+            <p className="mt-4 text-gray-200 text-sm md:text-base line-clamp-4">
               {movie.overview || "No overview available."}
             </p>
 
@@ -103,7 +103,7 @@ const MovieDetails = ({ movie, onClose }) => {
           </div>
         </div>
 
-        {/* Cast Section */}
+        {/* Cast */}
         {cast.length > 0 && (
           <div className="p-6">
             <h3 className="text-white text-xl font-bold mb-4">Cast</h3>
