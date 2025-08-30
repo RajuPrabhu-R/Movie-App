@@ -18,7 +18,8 @@ const MovieCard = ({ movie, onClick }) => (
     onClick={() => onClick(movie)}
   >
     <img
-      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+      src={poster_path ?
+`https://image.tmdb.org/t/p/w500${movie.poster_path}` : 'No-Poster.png'}
       alt={movie.title || movie.name}
       className="w-full h-64 object-cover"
     />
