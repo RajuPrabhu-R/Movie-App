@@ -140,7 +140,7 @@ const App = () => {
       {heroMovie && (
         <div
           {...swipeHandlers}
-          className="relative h-[40vh] flex items-end bg-cover bg-center transition-all duration-500"
+          className="relative h-[70vh] flex items-end bg-cover bg-center transition-all duration-700"
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})`,
           }}
