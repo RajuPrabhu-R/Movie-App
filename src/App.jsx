@@ -206,7 +206,7 @@ const App = () => {
                 <MovieCard
                   key={movie.id}
                   movie={movie}
-                  onClick={setSelectedMovie}
+                className="bg-gradient-to-r from-green-400 to-blue-500" onClick={setSelectedMovie}
                 />
               ))}
             </div>
