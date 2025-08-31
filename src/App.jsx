@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import MovieDetails from "./components/MovieDetails"; // Now inline
+import MovieDetails from "./components/MovieDetails"; // Ensure this exists
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -251,14 +251,12 @@ const App = () => {
             <MovieRow title="Disney+" movies={disney} onClick={setSelectedMovie} />
           </>
         )}
-
-        {/* Inline Movie Details */}
-        {selectedMovie && (
-          <div className="mt-10">
-            <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
-          </div>
-        )}
       </div>
+
+      {/* Movie Details Modal */}
+      {selectedMovie && (
+        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+      )}
     </main>
   );
 };
