@@ -152,7 +152,7 @@ const App = () => {
               {heroMovie.overview}
             </p>
             <button
-              className="mt-4 px-6 py-5 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+              className="mt-4 mb-4 px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
               onClick={() => setSelectedMovie(heroMovie)}
             >
               Play
