@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import MovieDetails from "./components/MovieDetails"; // Make sure this exists
+import { useSwipeable } from "react-swipeable";
+import MovieDetails from "./components/MovieDetails"; // Ensure this exists
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -18,8 +19,7 @@ const MovieCard = ({ movie, onClick }) => (
     onClick={() => onClick(movie)}
   >
     <img
-      src={
-`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
       alt={movie.title || movie.name}
       className="w-full h-64 object-cover"
     />
@@ -41,7 +41,6 @@ const MovieRow = ({ title, movies, onClick }) => (
   </section>
 );
 
-// Main App Component
 const App = () => {
   const [heroMovie, setHeroMovie] = useState(null);
   const [heroIndex, setHeroIndex] = useState(0);
@@ -86,10 +85,19 @@ const App = () => {
 
     const interval = setInterval(() => {
       setHeroIndex((prev) => (prev + 1) % trending.length);
-    }, 5000); // 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [trending, heroIndex]);
+
+  // Swipe Handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () =>
+      setHeroIndex((prev) => (prev + 1) % trending.length),
+    onSwipedRight: () =>
+      setHeroIndex((prev) => (prev - 1 + trending.length) % trending.length),
+    trackMouse: true,
+  });
 
   // Handle search submit
   const handleSearch = async (e) => {
@@ -122,20 +130,16 @@ const App = () => {
 
   return (
     <main className="min-h-screen bg-dark text-white">
-      {/* Global scrollbar hide */}
+      {/* Hide scrollbars */}
       <style>{`
-        ::-webkit-scrollbar {
-          display: none;
-        }
-        * {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Hero Banner */}
       {heroMovie && (
         <div
+          {...swipeHandlers}
           className="relative h-[70vh] flex items-end bg-cover bg-center transition-all duration-500"
           style={{
             backgroundImage: `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})`,
@@ -154,6 +158,7 @@ const App = () => {
               Play
             </button>
           </div>
+
           {/* Manual Controls */}
           <div className="absolute top-1/2 left-0 right-0 flex justify-between px-4">
             <button
@@ -170,6 +175,21 @@ const App = () => {
             >
               ▶
             </button>
+          </div>
+
+          {/* Indicators with Smooth Animation */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {trending.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setHeroIndex(idx)}
+                className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                  idx === heroIndex
+                    ? "bg-white scale-125 animate-pulse"
+                    : "bg-gray-500 hover:bg-gray-400"
+                }`}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -206,7 +226,7 @@ const App = () => {
                 <MovieCard
                   key={movie.id}
                   movie={movie}
-                 onClick={setSelectedMovie}
+                  onClick={setSelectedMovie}
                 />
               ))}
             </div>
@@ -223,37 +243,12 @@ const App = () => {
           </section>
         ) : (
           <>
-            <MovieRow
-              className="bg-gradient-to-r from-green-400 to-blue-500"
-              title="Trending Movies"
-              movies={trending}
-              onClick={setSelectedMovie}
-            />
-            <MovieRow
-              title="TV Shows"
-              movies={tv}
-              onClick={setSelectedMovie}
-            />
-            <MovieRow
-              title="Netflix Originals"
-              movies={netflix}
-              onClick={setSelectedMovie}
-            />
-            <MovieRow
-              title="Amazon Prime"
-              movies={prime}
-              onClick={setSelectedMovie}
-            />
-            <MovieRow
-              title="Apple TV+"
-              movies={apple}
-              onClick={setSelectedMovie}
-            />
-            <MovieRow
-              title="Disney+"
-              movies={disney}
-              onClick={setSelectedMovie}
-            />
+            <MovieRow title="Trending Movies" movies={trending} onClick={setSelectedMovie} />
+            <MovieRow title="TV Shows" movies={tv} onClick={setSelectedMovie} />
+            <MovieRow title="Netflix Originals" movies={netflix} onClick={setSelectedMovie} />
+            <MovieRow title="Amazon Prime" movies={prime} onClick={setSelectedMovie} />
+            <MovieRow title="Apple TV+" movies={apple} onClick={setSelectedMovie} />
+            <MovieRow title="Disney+" movies={disney} onClick={setSelectedMovie} />
           </>
         )}
       </div>
