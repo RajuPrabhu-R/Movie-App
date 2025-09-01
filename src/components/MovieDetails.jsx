@@ -9,7 +9,7 @@ const MovieDetails = ({ movie, onClose }) => {
   const [error, setError] = useState("");
   const [playMovie, setPlayMovie] = useState(false);
 
-  const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}`;
+  const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}` || `https://youtube.com/watch?v=${movie.title}`;
 
   useEffect(() => {
     if (!movie) return;
