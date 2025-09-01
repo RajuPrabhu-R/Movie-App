@@ -1,106 +1,199 @@
-import React, { useEffect, useState } from "react";
-
-const API_BASE_URL = "https://api.themoviedb.org/3";
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const MovieDetails = ({ movie, onClose }) => {
+  const API_BASE_URL = "https://api.themoviedb.org/3";
+  const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+
+  const [error, setError] = useState("");
   const [cast, setCast] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [error, setError] = useState("");
+  const [trailerUrl, setTrailerUrl] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!movie) return;
-
     const fetchDetails = async () => {
+      if (!movie) return;
+      setLoading(true);
+      setError("");
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/${movie.media_type || "movie"}/${movie.id}?api_key=${API_KEY}&append_to_response=credits`
+        // Fetch Cast
+        const castResponse = await axios.get(
+          `${API_BASE_URL}/movie/${movie.id}/credits?api_key=${API_KEY}`
         );
-        const data = await res.json();
+        setCast(castResponse.data.cast);
 
-        if (data.success === false) {
-          setError("Failed to load details");
-          return;
+        // Fetch Genres
+        const genresResponse = await axios.get(
+          `${API_BASE_URL}/genre/movie/list?api_key=${API_KEY}`
+        );
+        setGenres(genresResponse.data.genres);
+
+        // Fetch Trailer
+        const videosResponse = await axios.get(
+          `${API_BASE_URL}/movie/${movie.id}/videos?api_key=${API_KEY}`
+        );
+        const trailer = videosResponse.data.results.find(
+          (vid) => vid.type === "Trailer" && vid.site === "YouTube"
+        );
+        if (trailer) {
+          setTrailerUrl(`https://www.youtube.com/embed/${trailer.key}`);
         }
-
-        setGenres(data.genres || []);
-        setCast(data.credits?.cast?.slice(0, 8) || []);
       } catch (err) {
-        setError("Something went wrong.");
+        setError("Failed to fetch details. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDetails();
-  }, [movie]);
+  }, [movie, API_KEY]);
 
   if (!movie) return null;
 
+  const getGenreNames = (ids) =>
+    ids
+      .map((id) => {
+        const g = genres.find((x) => x.id === id);
+        return g ? g.name : null;
+      })
+      .filter(Boolean);
+
+  const movieLink = `https://player.vidplus.to/embed/movie/${movie.id}`;
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-      onClick={onClose} // close when clicking backdrop
-    >
-      <div
-        className="relative bg-gray-900 text-white rounded-2xl shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()} // prevent backdrop close on inner click
-      >
-        {/* Back Button */}
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-start z-50 overflow-y-auto">
+      <div className="relative w-full max-w-5xl">
+        {/* Close button */}
         <button
-          className="absolute top-4 left-4 bg-black/70 px-4 py-2 rounded-lg hover:bg-red-600 transition"
+          className="absolute top-5 right-5 text-white text-4xl hover:text-red-500 z-50"
           onClick={onClose}
         >
-          ← Back
+          &times;
         </button>
 
-        {/* Poster */}
-        <div className="w-full h-64 md:h-96 rounded-t-2xl overflow-hidden">
-          <img
-            src={`https://image.tmdb.org/t/p/original${movie.backdrop_path || movie.poster_path}`}
-            alt={movie.title || movie.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
+        {/* Hero Banner */}
+        <div
+          className="w-full h-[520px] bg-cover bg-center relative rounded-b-2xl"
+          style={{
+            backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent rounded-b-2xl"></div>
 
-        {/* Content */}
-        <div className="p-6">
-          <h1 className="text-3xl font-bold">{movie.title || movie.name}</h1>
-          <p className="text-gray-400 text-sm mt-1">
-            {movie.release_date || movie.first_air_date} •{" "}
-            {genres.map((g) => g.name).join(", ")}
-          </p>
+          {/* Title & Info */}
+          <div className="absolute bottom-6 md:bottom-10 left-6 md:left-12 text-white max-w-3xl">
+            <h2 className="text-3xl md:text-5xl font-extrabold mb-2 drop-shadow-lg">
+              {movie.title || movie.name}
+            </h2>
+            <p className="text-yellow-400 font-semibold text-lg">
+              ⭐ {movie.vote_average?.toFixed(1)} / 10
+            </p>
 
-          {/* Overview */}
-          <p className="mt-4 text-gray-300">{movie.overview}</p>
+            {/* Poster */}
+            <img
+              src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
+              alt={movie.title}
+              className="rounded-lg mt-4 w-40 md:w-56 shadow-lg"
+            />
 
-          {/* Cast */}
-          {cast.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-3">Top Cast</h2>
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {cast.map((actor) => (
-                  <div
-                    key={actor.id}
-                    className="w-28 flex-shrink-0 text-center"
-                  >
-                    <img
-                      src={
-                        actor.profile_path
-                          ? `https://image.tmdb.org/t/p/w200${actor.profile_path}`
-                          : "https://via.placeholder.com/200x300?text=No+Image"
-                      }
-                      alt={actor.name}
-                      className="w-28 h-36 object-cover rounded-lg mb-2"
-                    />
-                    <p className="text-sm font-medium truncate">{actor.name}</p>
-                    <p className="text-xs text-gray-400 truncate">
-                      {actor.character}
-                    </p>
-                  </div>
-                ))}
-              </div>
+            {/* Genre Tags */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              {getGenreNames(movie.genre_ids).map((genre) => (
+                <span
+                  key={genre}
+                  className="bg-red-600 px-3 py-1 rounded-full text-sm"
+                >
+                  {genre}
+                </span>
+              ))}
             </div>
-          )}
+
+            {/* Overview */}
+            <p className="mt-4 text-gray-200 text-sm md:text-base line-clamp-3">
+              {movie.overview || "No overview available."}
+            </p>
+
+            {/* Play Button */}
+            <button
+              className="mt-5 bg-white text-black font-bold px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+              onClick={() => setIsPlaying(true)}
+            >
+              ▶ Play
+            </button>
+          </div>
         </div>
+
+        {/* Cast Section */}
+        {cast.length > 0 && (
+          <div className="p-6">
+            <h3 className="text-white text-xl font-bold mb-4">Cast</h3>
+            <div className="flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
+              {cast.slice(0, 10).map((actor) => (
+                <div key={actor.id} className="flex-shrink-0 w-24 text-center">
+                  <img
+                    src={
+                      actor.profile_path
+                        ? `https://image.tmdb.org/t/p/w300${actor.profile_path}`
+                        : "https://via.placeholder.com/150"
+                    }
+                    alt={actor.name}
+                    className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+                  />
+                  <p className="text-sm">{actor.name}</p>
+                  <p className="text-xs text-gray-400">{actor.character}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Player Modal */}
+        {isPlaying && (
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50">
+            <div className="relative w-full max-w-3xl">
+              <button
+                className="absolute -top-12 right-0 text-white text-3xl hover:text-red-500"
+                onClick={() => setIsPlaying(false)}
+              >
+                &times;
+              </button>
+
+              {loading ? (
+                <div className="text-white text-center">Loading...</div>
+              ) : error ? (
+                <div className="text-red-500 text-center">{error}</div>
+              ) : movieLink ? (
+                // Full Movie Player
+                <video
+                  width="100%"
+                  height="500"
+                  controls
+                  autoPlay
+                  className="rounded-lg"
+                >
+                  <source src={movieLink} type="video/mp4" />
+                </video>
+              ) : trailerUrl ? (
+                // Trailer Player
+                <iframe
+                  width="100%"
+                  height="500"
+                  src={trailerUrl}
+                  title="Movie Trailer"
+                  className="rounded-lg"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="text-red-400 text-center">
+                  No video available.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
