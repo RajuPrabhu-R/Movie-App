@@ -142,7 +142,7 @@ const App = () => {
           {...swipeHandlers}
           className="relative h-[70vh] flex items-end bg-cover bg-center transition-all duration-700"
           style={{
-            backgroundImage: `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})` || `No-Poster.png`,
+            backgroundImage: `url(https://image.tmdb.org/t/p/original${heroMovie.backdrop_path})` || `.No-Poster.png`,
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
