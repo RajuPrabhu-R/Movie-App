@@ -78,7 +78,7 @@ const MovieDetails = ({ movie, onClose }) => {
             {/* Poster */}
             <div className="w-full h-64 md:h-96 rounded-t-2xl overflow-hidden">
               <img
-                src={`https://image.tmdb.org/t/p/original${movie.backdrop_path || movie.poster_path}`}
+                src={`https://image.tmdb.org/t/p/original${movie.poster_path}` || `/No-Poster.png`}
                 alt={movie.title || movie.name}
                 className="w-full h-full object-cover"
               />
