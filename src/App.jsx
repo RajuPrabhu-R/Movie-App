@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
-import MovieDetails from "./components/MovieDetails"; // Ensure this exists
+import MovieDetails from "./components/MovieDetails";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -76,6 +76,23 @@ const App = () => {
 
     loadData();
   }, []);
+
+  // Load selectedMovie from localStorage (persist modal after refresh)
+  useEffect(() => {
+    const savedMovie = localStorage.getItem("selectedMovie");
+    if (savedMovie) {
+      setSelectedMovie(JSON.parse(savedMovie));
+    }
+  }, []);
+
+  // Save selectedMovie to localStorage
+  useEffect(() => {
+    if (selectedMovie) {
+      localStorage.setItem("selectedMovie", JSON.stringify(selectedMovie));
+    } else {
+      localStorage.removeItem("selectedMovie");
+    }
+  }, [selectedMovie]);
 
   // Auto-rotate hero banner
   useEffect(() => {
@@ -177,7 +194,7 @@ const App = () => {
             </button>
           </div>
 
-          {/* Indicators with Smooth Animation */}
+          {/* Indicators */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
             {trending.map((_, idx) => (
               <button
@@ -255,7 +272,10 @@ const App = () => {
 
       {/* Movie Details Modal */}
       {selectedMovie && (
-        <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+        <MovieDetails
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
     </main>
   );
