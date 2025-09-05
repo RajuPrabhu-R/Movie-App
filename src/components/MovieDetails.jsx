@@ -52,12 +52,7 @@ const MovieDetails = ({ movie, onClose }) => {
   if (!movie) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose(); // only close on backdrop click
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="relative bg-gray-900 text-white rounded-2xl shadow-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
         {/* Back Button */}
         <button
