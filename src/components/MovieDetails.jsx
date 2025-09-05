@@ -9,6 +9,17 @@ const MovieDetails = ({ movie, onClose }) => {
   const [error, setError] = useState("");
   const [playMovie, setPlayMovie] = useState(false);
 
+  // ✅ Load playMovie state from localStorage
+  useEffect(() => {
+    const savedPlay = localStorage.getItem("playMovie");
+    if (savedPlay === "true") setPlayMovie(true);
+  }, []);
+
+  // ✅ Save playMovie state to localStorage
+  useEffect(() => {
+    localStorage.setItem("playMovie", playMovie ? "true" : "false");
+  }, [playMovie]);
+
   // Choose correct embed URL based on type
   const embedUrl =
     movie.media_type === "tv"
@@ -57,7 +68,11 @@ const MovieDetails = ({ movie, onClose }) => {
         {/* Back Button */}
         <button
           className="absolute top-4 left-4 bg-black/70 px-4 py-2 rounded-lg hover:bg-red-600 transition"
-          onClick={onClose}
+          onClick={() => {
+            localStorage.removeItem("selectedMovie");
+            localStorage.removeItem("playMovie");
+            onClose();
+          }}
         >
           ← Back
         </button>
