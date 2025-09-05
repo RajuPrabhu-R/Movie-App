@@ -9,7 +9,11 @@ const MovieDetails = ({ movie, onClose }) => {
   const [error, setError] = useState("");
   const [playMovie, setPlayMovie] = useState(false);
 
-  const embedUrl = `https://player.vidplus.to/embed/movie/${movie.id}` || `https://player.vidplus.to/embed/tv/${series.id}`;
+  // Choose correct embed URL based on type
+  const embedUrl =
+    movie.media_type === "tv"
+      ? `https://player.vidplus.to/embed/tv/${movie.id}`
+      : `https://player.vidplus.to/embed/movie/${movie.id}`;
 
   useEffect(() => {
     if (!movie) return;
@@ -36,18 +40,26 @@ const MovieDetails = ({ movie, onClose }) => {
     fetchDetails();
   }, [movie]);
 
+  // Close modal on ESC key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [onClose]);
+
   if (!movie) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose(); // only close on backdrop click
+      }}
     >
-      <div
-        className="relative bg-gray-900 text-white rounded-2xl shadow-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Back Button (Close Modal) */}
+      <div className="relative bg-gray-900 text-white rounded-2xl shadow-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Back Button */}
         <button
           className="absolute top-4 left-4 bg-black/70 px-4 py-2 rounded-lg hover:bg-red-600 transition"
           onClick={onClose}
@@ -64,8 +76,6 @@ const MovieDetails = ({ movie, onClose }) => {
               allowFullScreen
               className="w-full h-full rounded-t-2xl"
             />
-
-            {/* Back to Details Button */}
             <button
               className="absolute top-4 right-4 bg-black/70 px-4 py-2 rounded-lg hover:bg-blue-600 transition"
               onClick={() => setPlayMovie(false)}
@@ -78,7 +88,11 @@ const MovieDetails = ({ movie, onClose }) => {
             {/* Poster */}
             <div className="w-full h-64 md:h-96 rounded-t-2xl overflow-hidden">
               <img
-                src={`https://image.tmdb.org/t/p/original${movie.poster_path}` || `/No-Poster.png`}
+                src={
+                  movie.poster_path
+                    ? `https://image.tmdb.org/t/p/original${movie.poster_path}`
+                    : `/No-Poster.png`
+                }
                 alt={movie.title || movie.name}
                 className="w-full h-full object-cover"
               />
@@ -92,10 +106,8 @@ const MovieDetails = ({ movie, onClose }) => {
                 {genres.map((g) => g.name).join(", ")}
               </p>
 
-              {/* Overview */}
               <p className="mt-4 text-gray-300">{movie.overview}</p>
 
-              {/* Play Movie Button */}
               <button
                 className="mt-4 px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
                 onClick={() => setPlayMovie(true)}
@@ -109,10 +121,7 @@ const MovieDetails = ({ movie, onClose }) => {
                   <h2 className="text-xl font-semibold mb-3">Top Cast</h2>
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {cast.map((actor) => (
-                      <div
-                        key={actor.id}
-                        className="w-28 flex-shrink-0 text-center"
-                      >
+                      <div key={actor.id} className="w-28 flex-shrink-0 text-center">
                         <img
                           src={
                             actor.profile_path
